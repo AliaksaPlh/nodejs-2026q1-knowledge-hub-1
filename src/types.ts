@@ -30,3 +30,12 @@ export interface Comment {
   authorId: string | null; // refers to User
   createdAt: number; // timestamp of creation
 }
+export interface CreateUserDto {
+  login: string;
+  password: string;
+  role?: 'admin' | 'editor' | 'viewer'; // defaults to 'viewer'
+}
+export interface UpdatePasswordDto {
+  oldPassword: string;
+  newPassword: string;
+}
