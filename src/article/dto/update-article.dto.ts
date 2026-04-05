@@ -8,25 +8,24 @@ import {
 } from 'class-validator';
 import { ArticleStatus } from '../../enum';
 
-export class CreateArticleDto {
+export class UpdateArticleDto {
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
-  title: string;
+  title?: string;
 
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
-  content: string;
+  content?: string;
 
+  @IsOptional()
   @IsEnum(ArticleStatus)
-  status: ArticleStatus;
+  status?: ArticleStatus;
 
   @IsOptional()
   @IsUUID('4')
-  authorId: string | null;
-
-  @IsOptional()
-  @IsUUID('4')
-  categoryId: string | null;
+  categoryId?: string | null;
 
   @IsOptional()
   @IsArray()

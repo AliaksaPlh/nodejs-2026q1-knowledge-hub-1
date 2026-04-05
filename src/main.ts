@@ -1,5 +1,7 @@
+import 'dotenv/config';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -11,6 +13,18 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  await app.listen(process.env.PORT ?? 4000);
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Knowledge Hub API')
+    .setDescription(
+      'REST API for users, articles, categories, and comments (in-memory storage).',
+    )
+    .setVersion('1.0')
+    .build();
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('doc', app, document);
+
+  const port = process.env.PORT ?? 4000;
+  await app.listen(port);
 }
 bootstrap();
