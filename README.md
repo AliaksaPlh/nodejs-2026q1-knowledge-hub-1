@@ -29,12 +29,24 @@ For more information about OpenAPI/Swagger please visit https://swagger.io/.
 
 ## Testing
 
-After application running open new terminal and enter:
+E2E tests call a **running** HTTP API (see `test/lib/request.ts`: host is `localhost` and port is `PORT` from `.env`, default **4000**).
 
-To run all tests without authorization
+1. Copy `.env.example` to `.env` if you have not already.
+2. **Start the API** in one terminal (port must match `PORT` in `.env`), for example:
+   - `npm run build && npm run start:prod`, or
+   - `npm run start` / `npm run start:dev`
+3. In **another** terminal run the tests below.
+
+To run all template tests without authorization (only `test/*.spec.ts`)
 
 ```
 npm run test
+```
+
+To run **additional** custom tests (pagination and sorting in `test/custom/`)
+
+```
+npm run test:custom
 ```
 
 To run only one of all test suites
