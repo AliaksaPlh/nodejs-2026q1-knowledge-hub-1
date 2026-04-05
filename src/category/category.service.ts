@@ -1,7 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
+import type { PaginatedResult } from '../types';
+import { toListOrPaginated } from '../common/utils/paginate-and-sort';
 import { MemoryStorageService } from '../storage/memory-storage.service';
 import type { Category } from '../types';
+import { CategoryListQueryDto } from './dto/category-list.query.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
@@ -9,8 +12,20 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 export class CategoryService {
   constructor(private readonly storage: MemoryStorageService) {}
 
-  async findAll(): Promise<Array<Category>> {
-    return Array.from(this.storage.categories.values());
+  async findAll(
+    query: CategoryListQueryDto,
+  ): Promise<Array<Category> | PaginatedResult<Category>> {
+    const list = Array.from(this.storage.categories.values());
+    return toListOrPaginated(
+      list as unknown as Array<Record<string, unknown>>,
+      query,
+      {
+        sortBy: query.sortBy,
+        order: query.order,
+        allowedSortKeys: ['id', 'name', 'description'],
+        defaultSortBy: 'name',
+      },
+    ) as unknown as Array<Category> | PaginatedResult<Category>;
   }
 
   async findOne(id: string): Promise<Category> {

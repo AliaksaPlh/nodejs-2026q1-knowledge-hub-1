@@ -8,9 +8,11 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CategoryService } from './category.service';
+import { CategoryListQueryDto } from './dto/category-list.query.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
@@ -20,8 +22,16 @@ export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Get()
-  findAll() {
-    return this.categoryService.findAll();
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: ['id', 'name', 'description'],
+  })
+  @ApiQuery({ name: 'order', required: false, enum: ['asc', 'desc'] })
+  findAll(@Query() query: CategoryListQueryDto) {
+    return this.categoryService.findAll(query);
   }
 
   @Get(':id')

@@ -8,10 +8,12 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { UserListQueryDto } from './dto/user-list.query.dto';
 import { UserService } from './user.service';
 
 @ApiTags('users')
@@ -20,8 +22,16 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: ['login', 'role', 'createdAt', 'updatedAt'],
+  })
+  @ApiQuery({ name: 'order', required: false, enum: ['asc', 'desc'] })
+  findAll(@Query() query: UserListQueryDto) {
+    return this.userService.findAll(query);
   }
 
   @Get(':id')

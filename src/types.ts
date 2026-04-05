@@ -39,3 +39,10 @@ export interface UpdatePasswordDto {
   oldPassword: string;
   newPassword: string;
 }
+
+export interface PaginatedResult<T> {
+  total: number;
+  page: number;
+  limit: number;
+  data: Array<T>;
+}

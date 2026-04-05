@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -11,8 +10,8 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
-import { validate, version } from 'uuid';
 import { CommentService } from './comment.service';
+import { CommentByArticleQueryDto } from './dto/comment-by-article.query.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 
 @ApiTags('comments')
@@ -22,18 +21,16 @@ export class CommentController {
 
   @Get()
   @ApiQuery({ name: 'articleId', required: true, type: String })
-  findByArticle(@Query('articleId') articleId: string | undefined) {
-    if (articleId == null || String(articleId).trim() === '') {
-      throw new BadRequestException(
-        'articleId query parameter is required',
-      );
-    }
-    if (!validate(articleId) || version(articleId) !== 4) {
-      throw new BadRequestException(
-        'articleId must be a valid UUID v4',
-      );
-    }
-    return this.commentService.findByArticleId(articleId);
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: ['createdAt', 'content'],
+  })
+  @ApiQuery({ name: 'order', required: false, enum: ['asc', 'desc'] })
+  findByArticle(@Query() query: CommentByArticleQueryDto) {
+    return this.commentService.findByArticle(query);
   }
 
   @Get(':id')

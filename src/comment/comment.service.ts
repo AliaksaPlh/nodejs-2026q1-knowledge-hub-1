@@ -5,18 +5,33 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
+import type { PaginatedResult } from '../types';
+import { toListOrPaginated } from '../common/utils/paginate-and-sort';
 import { MemoryStorageService } from '../storage/memory-storage.service';
 import type { Comment } from '../types';
+import { CommentByArticleQueryDto } from './dto/comment-by-article.query.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 
 @Injectable()
 export class CommentService {
   constructor(private readonly storage: MemoryStorageService) {}
 
-  async findByArticleId(articleId: string): Promise<Array<Comment>> {
-    return Array.from(this.storage.comments.values()).filter(
-      (c) => c.articleId === articleId,
+  findByArticle(
+    query: CommentByArticleQueryDto,
+  ): Array<Comment> | PaginatedResult<Comment> {
+    const list = Array.from(this.storage.comments.values()).filter(
+      (c) => c.articleId === query.articleId,
     );
+    return toListOrPaginated(
+      list as unknown as Array<Record<string, unknown>>,
+      query,
+      {
+        sortBy: query.sortBy,
+        order: query.order,
+        allowedSortKeys: ['createdAt', 'content'],
+        defaultSortBy: 'createdAt',
+      },
+    ) as unknown as Array<Comment> | PaginatedResult<Comment>;
   }
 
   async create(dto: CreateCommentDto): Promise<Comment> {

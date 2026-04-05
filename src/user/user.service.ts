@@ -6,10 +6,13 @@ import {
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
 import { UserRole } from '../enum';
+import type { PaginatedResult } from '../types';
+import { toListOrPaginated } from '../common/utils/paginate-and-sort';
 import { MemoryStorageService } from '../storage/memory-storage.service';
 import type { User } from '../types';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import type { UserListQueryDto } from './dto/user-list.query.dto';
 
 export type PublicUser = Omit<User, 'password'>;
 
@@ -18,14 +21,31 @@ export class UserService {
   constructor(private readonly storage: MemoryStorageService) {}
 
   private toPublicUser(user: User): PublicUser {
-    const { password: _password, ...rest } = user;
-    return rest;
+    return {
+      id: user.id,
+      login: user.login,
+      role: user.role,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
   }
 
-  async findAll(): Promise<Array<PublicUser>> {
-    return Array.from(this.storage.users.values()).map((u) =>
+  async findAll(
+    query: UserListQueryDto,
+  ): Promise<Array<PublicUser> | PaginatedResult<PublicUser>> {
+    const users = Array.from(this.storage.users.values()).map((u) =>
       this.toPublicUser(u),
     );
+    return toListOrPaginated(
+      users as unknown as Array<Record<string, unknown>>,
+      query,
+      {
+        sortBy: query.sortBy,
+        order: query.order,
+        allowedSortKeys: ['login', 'role', 'createdAt', 'updatedAt'],
+        defaultSortBy: 'createdAt',
+      },
+    ) as Array<PublicUser> | PaginatedResult<PublicUser>;
   }
 
   async findOne(id: string): Promise<PublicUser> {

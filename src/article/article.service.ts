@@ -1,10 +1,16 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { randomUUID } from 'crypto';
+import type { PaginatedResult } from '../types'
+import { toListOrPaginated } from '../common/utils/paginate-and-sort';
 import { MemoryStorageService } from '../storage/memory-storage.service';
 import type { Article } from '../types';
-import { ArticleFilterQueryDto } from './dto/article-filter-query.dto';
+import { ArticleListQueryDto } from './dto/article-list.query.dto';
 import { CreateArticleDto } from './dto/create-article.dto';
-import { UpdateArticleDto } from './dto/update-article.dto';
+import { UpdateArticleDto } from './dto/update-article.dto'; 
 
 @Injectable()
 export class ArticleService {
@@ -19,7 +25,9 @@ export class ArticleService {
     }
   }
 
-  async findAll(query: ArticleFilterQueryDto): Promise<Array<Article>> {
+  async findAll(
+    query: ArticleListQueryDto,
+  ): Promise<Array<Article> | PaginatedResult<Article>> {
     let list = Array.from(this.storage.articles.values());
     if (query.status != null) {
       list = list.filter((a) => a.status === query.status);
@@ -30,7 +38,22 @@ export class ArticleService {
     if (query.tag != null && query.tag !== '') {
       list = list.filter((a) => a.tags.includes(query.tag));
     }
-    return list;
+    return toListOrPaginated(
+      list as unknown as Array<Record<string, unknown>>,
+      query,
+      {
+        sortBy: query.sortBy,
+        order: query.order,
+        allowedSortKeys: [
+          'title',
+          'content',
+          'status',
+          'createdAt',
+          'updatedAt',
+        ],
+        defaultSortBy: 'createdAt',
+      },
+    ) as unknown as Array<Article> | PaginatedResult<Article>;
   }
 
   async create(dto: CreateArticleDto): Promise<Article> {

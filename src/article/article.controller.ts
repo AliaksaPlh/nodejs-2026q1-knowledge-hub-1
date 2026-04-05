@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ArticleService } from './article.service';
-import { ArticleFilterQueryDto } from './dto/article-filter-query.dto';
+import { ArticleListQueryDto } from './dto/article-list.query.dto';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 
@@ -22,10 +22,22 @@ export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
 
   @Get()
-  @ApiQuery({ name: 'status', required: false, enum: ['draft', 'published', 'archived'] })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ['draft', 'published', 'archived'],
+  })
   @ApiQuery({ name: 'categoryId', required: false, type: String })
   @ApiQuery({ name: 'tag', required: false, type: String })
-  findAll(@Query() query: ArticleFilterQueryDto) {
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: ['title', 'content', 'status', 'createdAt', 'updatedAt'],
+  })
+  @ApiQuery({ name: 'order', required: false, enum: ['asc', 'desc'] })
+  findAll(@Query() query: ArticleListQueryDto) {
     return this.articleService.findAll(query);
   }
 
