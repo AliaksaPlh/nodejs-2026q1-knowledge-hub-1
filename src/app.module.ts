@@ -5,6 +5,8 @@ import {
   RequestMethod,
 } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { ArticleModule } from './article/article.module';
 import { AccessGuard } from './common/guards/access.guard';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -22,7 +24,9 @@ import { UserModule } from './user/user.module';
     ArticleModule,
     CommentModule,
   ],
+  controllers: [AppController],
   providers: [
+    AppService,
     { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
     { provide: APP_GUARD, useClass: AccessGuard },
   ],

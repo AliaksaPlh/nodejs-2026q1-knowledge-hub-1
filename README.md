@@ -4,6 +4,7 @@
 
 - Git - [Download & Install Git](https://git-scm.com/downloads).
 - Node.js - [Download & Install Node.js](https://nodejs.org/en/download/) and the npm package manager.
+- Optional: [Docker](https://docs.docker.com/get-docker/) and Docker Compose v2 for the containerized stack (API + PostgreSQL).
 
 ## Downloading
 
@@ -26,6 +27,31 @@ npm start
 After starting the app on port (4000 as default) you can open
 in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
 For more information about OpenAPI/Swagger please visit https://swagger.io/.
+
+## Docker (API + PostgreSQL)
+
+Multi-stage **Dockerfile** (Node **24.10** on Alpine) and **docker-compose.yml**: services **app** and **db**, network `knowledge_hub`, volume `postgres_data`. Copy **`.env.example` → `.env`**, then from the repo root:
+
+```
+docker compose up --build
+```
+
+(Compose v1: same command with `docker-compose`.)
+
+- API: `http://localhost:4000` (default `PORT` in `.env`; Swagger: `/doc/`)
+- PostgreSQL on the host: `localhost:5432` unless you changed `POSTGRES_PORT` in `.env`
+- Optional **Adminer** (profile `debug`): `docker compose --profile debug up --build`, UI at `http://localhost:8080`
+
+**Docker Hub:** after `docker push`, open your repository on [hub.docker.com](https://hub.docker.com/) and copy the URL from the browser — add it here (`https://hub.docker.com/r/aliaksap/knowledge-hub`)
+
+```
+docker build -t YOUR_USERNAME/YOUR_REPO:latest .
+docker push YOUR_USERNAME/YOUR_REPO:latest
+```
+
+**Image scan (for the PR):** run one of `docker scout cves YOUR_USERNAME/YOUR_REPO:latest` or `trivy image YOUR_USERNAME/YOUR_REPO:latest` and briefly note the result (e.g. critical count).
+
+**Image size:** `docker images YOUR_USERNAME/YOUR_REPO`
 
 ## Testing
 
